@@ -20,10 +20,12 @@ public class CompanyManagementService {
 
     public void addClient(Client client) {
         clients.put(client.getId(), client);
+        company.addClient(client);
     }
 
     public void addProject(Project project) {
         projects.put(project.getId(), project);
+        company.addProject(project);
         if (project.getClient() != null) {
             project.getClient().registerProject(project);
         }
@@ -32,18 +34,29 @@ public class CompanyManagementService {
     public void hireEmployee(Employee employee, int departmentId) {
         Department department = departments.get(departmentId);
         if (department == null) {
-            throw new IllegalArgumentException("Department not found");
+            throw new IllegalArgumentException("Departament inexistent");
         }
         employees.put(employee.getId(), employee);
+        company.addEmployee(employee);
         department.addEmployee(employee);
+    }
+
+    public void addEmployee(Employee employee) {
+        employees.put(employee.getId(), employee);
+        company.addEmployee(employee);
+        Department department = employee.getDepartment();
+        if (department != null) {
+            departments.putIfAbsent(department.getId(), department);
+            department.addEmployee(employee);
+        }
     }
 
     public void appointManager(int departmentId, int managerId) {
         Department department = departments.get(departmentId);
         Employee employee = employees.get(managerId);
 
-        if (department == null) throw new IllegalArgumentException("Department not found");
-        if (!(employee instanceof Manager)) throw new IllegalArgumentException("Employee is not manager");
+        if (department == null) throw new IllegalArgumentException("Departament inexistent");
+        if (!(employee instanceof Manager)) throw new IllegalArgumentException("Angajatul nu este manager");
 
         department.appointManager((Manager) employee);
     }
@@ -52,27 +65,27 @@ public class CompanyManagementService {
         Employee employee = employees.get(employeeId);
         Project project = projects.get(projectId);
         if (employee == null || project == null) {
-            throw new IllegalArgumentException("Assignment failed");
+            throw new IllegalArgumentException("Atribuirea a esuat");
         }
         project.addMember(employee);
     }
 
     public void addTaskToProject(int projectId, Task task) {
         Project project = projects.get(projectId);
-        if (project == null) throw new IllegalArgumentException("Project not found");
+        if (project == null) throw new IllegalArgumentException("Proiect inexistent");
         project.addTask(task);
     }
 
     public void assignTaskToEmployee(int projectId, int taskId, int employeeId) {
         Project project = projects.get(projectId);
         Employee employee = employees.get(employeeId);
-        if (project == null || employee == null) throw new IllegalArgumentException("Assignment failed");
+        if (project == null || employee == null) throw new IllegalArgumentException("Atribuirea a esuat");
         project.assignTask(taskId, employee);
     }
 
     public void completeTask(int projectId, int taskId) {
         Project project = projects.get(projectId);
-        if (project == null) throw new IllegalArgumentException("Project not found");
+        if (project == null) throw new IllegalArgumentException("Proiect inexistent");
         project.completeTask(taskId);
     }
 
@@ -89,7 +102,7 @@ public class CompanyManagementService {
 
     public double calculateProjectCost(int projectId) {
         Project project = projects.get(projectId);
-        if (project == null) throw new IllegalArgumentException("Project not found");
+        if (project == null) throw new IllegalArgumentException("Proiect inexistent");
 
         double teamCost = project.getEmployees().stream()
                 .mapToDouble(Employee::getSalary)
@@ -113,7 +126,7 @@ public class CompanyManagementService {
 
     public boolean isProjectAtRisk(int projectId) {
         Project project = projects.get(projectId);
-        if (project == null) throw new IllegalArgumentException("Project not found");
+        if (project == null) throw new IllegalArgumentException("Proiect inexistent");
 
         double progress = project.progress();
         long daysLeft = project.getDeadline() == null
@@ -131,7 +144,7 @@ public class CompanyManagementService {
 
     public double calculatePerformanceScore(int employeeId) {
         Employee employee = employees.get(employeeId);
-        if (employee == null) throw new IllegalArgumentException("Employee not found");
+        if (employee == null) throw new IllegalArgumentException("Angajat inexistent");
 
         int assigned = 0;
         int completed = 0;
@@ -177,12 +190,12 @@ public class CompanyManagementService {
     public Manager promoteDeveloperToManager(int employeeId, int teamSize, double bonus) {
         Employee employee = employees.get(employeeId);
         if (!(employee instanceof Developer dev)) {
-            throw new IllegalArgumentException("Only a Developer can be promoted to Manager in this flow.");
+            throw new IllegalArgumentException("Doar un Developer poate fi promovat la Manager in acest flux.");
         }
 
         double score = calculatePerformanceScore(employeeId);
         if (score < 80) {
-            throw new IllegalStateException("Employee is not eligible for promotion. Score = " + score);
+            throw new IllegalStateException("Angajatul nu este eligibil pentru promovare. Scor = " + score);
         }
         Manager newManager = new Manager(
                 dev.getId(),
@@ -219,22 +232,22 @@ public class CompanyManagementService {
 
     public Employee assignBestDeveloperToTask(int projectId, int taskId) {
         Project project = projects.get(projectId);
-        if (project == null) throw new IllegalArgumentException("Project not found");
+        if (project == null) throw new IllegalArgumentException("Proiect inexistent");
 
         Task task = project.getTasks().values().stream()
                 .filter(t -> t.getId() == taskId)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Task inexistent"));
 
         return employees.values().stream()
                 .filter(e -> e instanceof Developer)
                 .max(Comparator.comparingDouble(e -> scoreDeveloperForTask((Developer) e, project, task)))
-                .orElseThrow(() -> new IllegalStateException("No developers available"));
+                .orElseThrow(() -> new IllegalStateException("Nu exista developeri disponibili"));
     }
 
     public List<Employee> recommendOptimalTeam(int projectId, int maxMembers) {
         Project project = projects.get(projectId);
-        if (project == null) throw new IllegalArgumentException("Project not found");
+        if (project == null) throw new IllegalArgumentException("Proiect inexistent");
 
         return employees.values().stream()
                 .sorted(Comparator.comparingDouble(
@@ -250,12 +263,12 @@ public class CompanyManagementService {
     }
 
     public void printSummary() {
-        System.out.println("Company: " + company.getName());
-        System.out.println("Departments: " + departments.size());
-        System.out.println("Employees: " + employees.size());
-        System.out.println("Projects: " + projects.size());
-        System.out.println("Clients: " + clients.size());
-        System.out.println("Payroll: " + totalPayroll());
+        System.out.println("Companie: " + company.getName());
+        System.out.println("Departamente: " + departments.size());
+        System.out.println("Angajati: " + employees.size());
+        System.out.println("Proiecte: " + projects.size());
+        System.out.println("Clienti: " + clients.size());
+        System.out.println("Fond salarial: " + totalPayroll());
     }
 
     public double totalPayroll() {
@@ -301,7 +314,7 @@ public class CompanyManagementService {
         Employee employee=employees.get(employeeId);
         if(employee == null)
         {
-            throw new IllegalArgumentException("Employee not found");
+            throw new IllegalArgumentException("Angajat inexistent");
         }
         int completedTasks=0;
         int lateTasks=0;
@@ -340,13 +353,13 @@ public class CompanyManagementService {
         Project project = projects.get(projectId);
         if(project == null)
         {
-            throw new IllegalArgumentException("Project not found");
+            throw new IllegalArgumentException("Proiect inexistent");
         }
 
         List<Task> tasks = new ArrayList<>(project.getTasks().values());
         if(tasks.isEmpty())
         {
-            throw new IllegalArgumentException("No tasks found");
+            throw new IllegalArgumentException("Nu exista task-uri");
         }
 
         double totalRemainingWork=0;
@@ -359,7 +372,7 @@ public class CompanyManagementService {
             {
                 continue;
             }
-            double weight=task.getDifficulty();
+            totalRemainingWork += task.getEstimatedHours();
 
             if(task.getStatus() == TaskStatus.BLOCKED)
             {
@@ -370,6 +383,9 @@ public class CompanyManagementService {
                 overdueTasks++;
             }
 
+        }
+        if (totalRemainingWork == 0) {
+            return LocalDate.now();
         }
         double teamVelocity =0;
 
@@ -387,10 +403,10 @@ public class CompanyManagementService {
 
             teamVelocity += (performance / 100.0) * skillFactor;
 
-            if (teamVelocity == 0) {
+        }
+            if (teamVelocity <= 0) {
                 teamVelocity = 1;
             }
-        }
             double estimatedDays = totalRemainingWork / teamVelocity;
             double penalty = 0;
             penalty += blockedTasks * 2;
@@ -409,5 +425,56 @@ public class CompanyManagementService {
             finalDays=Math.max(finalDays,1);
 
             return LocalDate.now().plusDays((long) finalDays);
+    }
+
+    public void removeDepartment(int departmentId) {
+        Department department = departments.remove(departmentId);
+        if (department == null) {
+            return;
+        }
+        for (Employee employee : new ArrayList<>(department.getEmployees())) {
+            department.removeEmployee(employee);
+        }
+        for (Project project : projects.values()) {
+            if (project.getDepartment() != null && project.getDepartment().getId() == departmentId) {
+                project.reassignDepartment(null);
+            }
+        }
+    }
+
+    public void removeClient(int clientId) {
+        Client client = clients.remove(clientId);
+        company.removeClient(clientId);
+        if (client == null) {
+            return;
+        }
+        for (Project project : projects.values()) {
+            if (project.getClient() != null && project.getClient().getId() == clientId) {
+                project.reassignClient(null);
+            }
+        }
+    }
+
+    public void removeEmployee(int employeeId) {
+        Employee employee = employees.remove(employeeId);
+        company.removeEmployee(employeeId);
+        if (employee == null) {
+            return;
+        }
+        Department department = employee.getDepartment();
+        if (department != null) {
+            department.removeEmployee(employee);
+        }
+        for (Project project : projects.values()) {
+            project.removeMember(employee);
+        }
+    }
+
+    public void removeProject(int projectId) {
+        Project project = projects.remove(projectId);
+        company.removeProject(projectId);
+        if (project != null && project.getClient() != null) {
+            project.getClient().removeProject(project);
+        }
     }
 }

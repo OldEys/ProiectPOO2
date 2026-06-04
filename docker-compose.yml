@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: proiect_poo2_postgres
+    environment:
+      POSTGRES_DB: proiect_poo2
+      POSTGRES_USER: proiect_user
+      POSTGRES_PASSWORD: proiect_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - proiect_poo2_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U proiect_user -d proiect_poo2"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  proiect_poo2_postgres_data:

@@ -1,7 +1,4 @@
-import jdk.jshell.execution.LocalExecutionControl;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 enum TaskStatus{TODO, IN_PROGRESS, REVIEW, DONE,BLOCKED}
@@ -20,11 +17,11 @@ abstract class Employee {
     protected Employee(int id,String fullName,String email,double salary,Department department) {
         if(id <=0)
         {
-            throw new IllegalArgumentException("Invalid ID");
+            throw new IllegalArgumentException("ID invalid");
         }
         if (salary<=0)
         {
-            throw new IllegalArgumentException("Invalid Salary");
+            throw new IllegalArgumentException("Salariu invalid");
         }
 
         this.id = id;
@@ -45,8 +42,14 @@ abstract class Employee {
 
     @Override
     public String toString() {
-        String deptName=department != null ? department.getName() : "none" ;
-        return getRole() + "{id=" +  id + ", fullName=" + fullName  + ", email=" + email + ", salary=" + "department" +salary + deptName +"}";
+        String deptName=department != null ? department.getName() : "fara departament" ;
+        return getRole() + "{id=" + id
+                + ", nume='" + fullName + '\''
+                + ", email='" + email + '\''
+                + ", salariu=" + getSalary()
+                + ", departament='" + deptName + '\''
+                + ", dataAngajare=" + hireDate
+                + '}';
 
     }
 
@@ -75,6 +78,10 @@ abstract class Employee {
         return this.salary;
     }
 
+    public double getBaseSalary() {
+        return this.salary;
+    }
+
     public String getEmail() {
         return this.email;
     }
@@ -84,6 +91,9 @@ abstract class Employee {
     }
 
     public void applyRaise(double percent) {
-        this.salary = this.salary + percent * salary;
+        if (percent < 0) {
+            throw new IllegalArgumentException("Procentul de marire nu poate fi negativ");
+        }
+        this.salary = this.salary + (percent / 100.0) * salary;
     }
 }

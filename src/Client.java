@@ -12,7 +12,7 @@ public class Client {
 
     public Client(int id, String name, String email, String industry) {
         if (id <= 0) {
-            throw new IllegalArgumentException("Invalid client ID");
+            throw new IllegalArgumentException("ID client invalid");
         }
         this.id = id;
         this.name = name;
@@ -171,29 +171,29 @@ public class Client {
         double score = calculateAccountHealthScore();
 
         if (score >= 85) {
-            return "PLATINUM";
+            return "PLATINA";
         }
         if (score >= 70) {
-            return "GOLD";
+            return "AUR";
         }
         if (score >= 50) {
-            return "SILVER";
+            return "ARGINT";
         }
-        return "BRONZE";
+        return "BRONZ";
     }
 
     @Override
     public String toString() {
         return "Client{id=" + id +
-                ", name='" + name + '\'' +
-                ", industry='" + industry + '\'' +
-                ", projects=" + projects.size() +
-                ", healthScore=" + String.format("%.2f", calculateAccountHealthScore()) +
-                ", tier=" + getAccountTier() +
+                ", nume='" + name + '\'' +
+                ", industrie='" + industry + '\'' +
+                ", proiecte=" + projects.size() +
+                ", scorSanatate=" + String.format("%.2f", calculateAccountHealthScore()) +
+                ", nivel=" + getAccountTier() +
                 '}';
     }
 
     public void registerProject(Project project) {
-
+        addProject(project);
     }
 }

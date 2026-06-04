@@ -1,7 +1,4 @@
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.Temporal;
-import java.util.stream.Collectors;
 import java.util.*;
 
 public class Project {
@@ -23,7 +20,7 @@ public class Project {
                    Client client, Task task,double budget, LocalDate deadlineDate) {
         if(id<=0)
         {
-            throw new IllegalArgumentException("Invalid ID");
+            throw new IllegalArgumentException("ID invalid");
         }
         this.id = id;
         this.name = name;
@@ -34,7 +31,27 @@ public class Project {
         this.budget = budget;
         this.status=ProjectStatus.PLANNED;
         this.deadlineDate = deadlineDate;
+        if (task != null) {
+            addTask(task);
+        }
 
+    }
+
+    public Project(int id, String name, String description, Department department,
+                   Client client, double budget, LocalDate deadlineDate, LocalDate startDate, ProjectStatus status) {
+        if(id<=0)
+        {
+            throw new IllegalArgumentException("ID invalid");
+        }
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.department = department;
+        this.client = client;
+        this.startDate = startDate == null ? LocalDate.now() : startDate;
+        this.budget = budget;
+        this.status = status == null ? ProjectStatus.PLANNED : status;
+        this.deadlineDate = deadlineDate;
     }
 
     public int getId() {
@@ -71,11 +88,17 @@ public class Project {
         });
     }
 
+    public void removeTask(int taskId) {
+        tasks.remove(taskId);
+        refreshStatus();
+    }
+
     public void addTask(Task task) {
         if (task == null) return;
         if (tasks.containsKey(task.getId())) {
-            throw new IllegalArgumentException("Task duplicate id");
+            throw new IllegalArgumentException("Exista deja un task cu acest ID in proiect");
         }
+        task.setProjectId(id);
         tasks.put(task.getId(), task);
         if (status == ProjectStatus.PLANNED) {
             status = ProjectStatus.ACTIVE;
@@ -83,7 +106,7 @@ public class Project {
     }
     public void assignTask(int taskId, Employee employee) {
         Task task = tasks.get(taskId);
-        if (task == null) throw new IllegalArgumentException("Task not found");
+        if (task == null) throw new IllegalArgumentException("Task inexistent");
         task.assignTo(employee);
         if (employee != null) employees.add(employee);
     }
@@ -111,11 +134,11 @@ public class Project {
     public double calculateWeightedProgress()
     {
         if(tasks.isEmpty()) return 0.0;
-        int totalWeight=0;
-        int completedWeight=0;
+        double totalWeight=0;
+        double completedWeight=0;
 
-        int blockedWeight=0;
-        int overduePenalty=0;
+        double blockedWeight=0;
+        double overduePenalty=0;
 
         for(Task task: tasks.values())
         {
@@ -127,9 +150,9 @@ public class Project {
                 completedWeight += weight;
             }
 
-            else if(task.getStatus() == TaskStatus.IN_PROGRESS)
+            else if(task.getStatus() == TaskStatus.IN_PROGRESS || task.getStatus() == TaskStatus.REVIEW)
             {
-                completedWeight += weight;
+                completedWeight += weight * 0.5;
             }
             if(task.getStatus()==TaskStatus.BLOCKED)
             {
@@ -159,24 +182,30 @@ public class Project {
 
         if(progress > 80 && blockedTasks ==0)
         {
-            return "Healthy";
+            return "SANATOS";
         }
         if(progress < 50 && overdueTasks < 3)
         {
-            return "STABLE";
+            return "STABIL";
         }
         if(blockedTasks > 2 || overdueTasks >3)
         {
-            return "AT RISK";
+            return "CU RISC";
         }
 
-        return "CRITICAL";
+        return "CRITIC";
     }
     @Override
     public String toString()
     {
-        return "Project{id=" +  id + ", name=" + name + ", description=" + description + ", startDate=" + startDate
-                + ", progress=" + String.format("%.2f",progress()) + "%, deadlineDate=" + deadlineDate + ", status=" + status + "}";
+        return "Proiect{id=" + id
+                + ", nume='" + name + '\''
+                + ", descriere='" + description + '\''
+                + ", dataStart=" + startDate
+                + ", progres=" + String.format("%.2f",progress()) + "%"
+                + ", termenLimita=" + deadlineDate
+                + ", status=" + status
+                + "}";
     }
     public Set<Employee> getEmployees() {
         return Collections.unmodifiableSet(employees);
@@ -186,6 +215,9 @@ public class Project {
         return Collections.unmodifiableMap(tasks);
     }
     public boolean isOverdue() {
+        if (deadlineDate == null) {
+            return false;
+        }
         return LocalDate.now().isAfter(deadlineDate);
     }
     public ProjectStatus getStatus()
@@ -231,5 +263,13 @@ public class Project {
 
     public void reassignDepartment(Department department) {
         this.department=department;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
     }
 }

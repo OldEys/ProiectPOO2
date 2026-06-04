@@ -13,18 +13,30 @@ public class Company {
     }
 
     public void addEmployee(Employee e) {
-        if (e == null) throw new IllegalArgumentException("Employee null");
+        if (e == null) throw new IllegalArgumentException("Angajatul nu poate fi null");
         employees.put(e.getId(), e);
     }
 
     public void addProject(Project p) {
-        if (p == null) throw new IllegalArgumentException("Project null");
+        if (p == null) throw new IllegalArgumentException("Proiectul nu poate fi null");
         projects.put(p.getId(), p);
     }
 
     public void addClient(Client c) {
-        if (c == null) throw new IllegalArgumentException("Client null");
+        if (c == null) throw new IllegalArgumentException("Clientul nu poate fi null");
         clients.put(c.getId(), c);
+    }
+
+    public void removeEmployee(int employeeId) {
+        employees.remove(employeeId);
+    }
+
+    public void removeProject(int projectId) {
+        projects.remove(projectId);
+    }
+
+    public void removeClient(int clientId) {
+        clients.remove(clientId);
     }
     
     public Collection<Employee> getEmployees() {
@@ -85,9 +97,9 @@ public class Company {
                 project.removeMember(weakest);
                 project.addMember(bestCandidate);
 
-                System.out.println("Reassigned: " + weakest.getFullName()
+                System.out.println("Realocat: " + weakest.getFullName()
                         + " -> " + bestCandidate.getFullName()
-                        + " in project " + project.getName());
+                        + " in proiectul " + project.getName());
             }
         }
     }
@@ -122,12 +134,12 @@ public class Company {
 
     @Override
     public String toString() {
-        return "Company{" +
-                "name='" + name + '\'' +
-                ", employees=" + employees.size() +
-                ", projects=" + projects.size() +
-                ", clients=" + clients.size() +
-                ", performanceIndex=" + String.format("%.2f", getCompanyPerformanceIndex()) +
+        return "Companie{" +
+                "nume='" + name + '\'' +
+                ", angajati=" + employees.size() +
+                ", proiecte=" + projects.size() +
+                ", clienti=" + clients.size() +
+                ", indicePerformanta=" + String.format("%.2f", getCompanyPerformanceIndex()) +
                 '}';
     }
 

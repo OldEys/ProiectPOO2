@@ -13,7 +13,7 @@ public class Department {
     {
         if(id<=0)
         {
-            throw new IllegalArgumentException("Invalid ID");
+            throw new IllegalArgumentException("ID invalid");
         }
 
         this.id = id;
@@ -32,10 +32,6 @@ public class Department {
         if(employee==null) return ;
         employees.add(employee);
         employee.setDepartment(this);
-        if(employee instanceof Manager m)
-        {
-            this.manager = m;
-        }
     }
     public void removeEmployee(Employee employee)
     {
@@ -67,7 +63,13 @@ public class Department {
     @Override
     public String toString()
     {
-        return "Department{id=" + id + ", name='" + name + '\'' + ", location='" + location;
+        String managerName = manager == null ? "fara manager" : manager.getFullName();
+        return "Departament{id=" + id
+                + ", nume='" + name + '\''
+                + ", locatie='" + location + '\''
+                + ", manager='" + managerName + '\''
+                + ", numarAngajati=" + employees.size()
+                + '}';
 
     }
 
@@ -92,7 +94,7 @@ public class Department {
     public void appointManager(Manager newManager) {
 
         if (newManager == null) {
-            throw new IllegalArgumentException("Manager cannot be null");
+            throw new IllegalArgumentException("Managerul nu poate fi null");
         }
 
         if (!employees.contains(newManager)) {
@@ -100,7 +102,7 @@ public class Department {
         }
 
         if (this.manager != null) {
-            System.out.println("Replacing manager: "
+            System.out.println("Manager inlocuit: "
                     + this.manager.getFullName()
                     + " -> " + newManager.getFullName());
         }

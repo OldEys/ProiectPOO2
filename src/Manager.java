@@ -5,7 +5,10 @@ public class Manager extends Employee {
     public Manager(int id, String fullName, String email, double salary, Department department, int teamSize,double bonus) {
         super(id, fullName, email, salary,department);
         if(teamSize < 0) {
-            throw new IllegalArgumentException("Invalid team size");
+            throw new IllegalArgumentException("Dimensiunea echipei este invalida");
+        }
+        if (bonus < 0) {
+            throw new IllegalArgumentException("Bonusul nu poate fi negativ");
         }
         this.teamSize = teamSize;
         this.bonus = bonus;
@@ -40,10 +43,16 @@ public class Manager extends Employee {
     }
 
     public void decreaseTeamSize() {
+        if (this.teamSize == 0) {
+            return;
+        }
         this.teamSize -= 1;
     }
 
     public void setManagementBonus(double bonus) {
+        if (bonus < 0) {
+            throw new IllegalArgumentException("Bonusul nu poate fi negativ");
+        }
         this.bonus=bonus;
     }
 }
