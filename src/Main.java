@@ -90,10 +90,10 @@ public class Main {
     private static final Map<Integer, Project> projects = new LinkedHashMap<>();
     private static final Map<Integer, Client> clients = new LinkedHashMap<>();
     public static void main(String[] args) {
-        titleMenu();
-//        company = new Company("TechCorp");
-//        service = new CompanyManagementService(company);
-//        seedTestData(service);
+//        titleMenu();
+        company = new Company("TechCorp");
+        service = new CompanyManagementService(company);
+        seedTestData(service);
 
         boolean running = true;
         while (running) {
@@ -365,10 +365,6 @@ public class Main {
             }
         }
     }
-
-    // =========================
-    // FLOW-URI: DEPARTMENTS
-    // =========================
 
     private static void addDepartmentFlow() {
         int id = readInt("Department ID: ");
@@ -1035,10 +1031,6 @@ public class Main {
         task.setDescription(newDescription);
         println("Descriere actualizata.");
     }
-
-    // =========================
-    // FLOW-URI: ANALYTICS
-    // =========================
 
     private static void topPerformersFlow() {
         if (employees.isEmpty()) {

@@ -26,6 +26,7 @@ public class Task {
         this.createdAt = LocalDate.now();
         this.difficulty = difficulty;
         this.dueDate=dueDate;
+        this.status=TaskStatus.TODO;
     }
 
     public int getId() {

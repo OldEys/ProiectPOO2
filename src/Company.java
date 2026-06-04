@@ -43,7 +43,6 @@ public class Company {
 
         for (Project project : projects.values()) {
 
-            // 🔹 identifică proiecte în risc
             boolean tooManyBlocked = project.getTasks().values().stream()
                     .filter(t -> t.getStatus() == TaskStatus.BLOCKED)
                     .count() >= 2;
@@ -71,7 +70,6 @@ public class Company {
 
             for (Employee e : employees.values()) {
 
-                // nu e deja în proiect
                 if (project.getEmployees().contains(e)) continue;
 
                 double perf = evaluateEmployeePerformance(e);
@@ -82,7 +80,6 @@ public class Company {
                 }
             }
 
-            // 🔹 înlocuire (dacă are sens)
             if (weakest != null && bestCandidate != null && maxScore > minScore) {
 
                 project.removeMember(weakest);
